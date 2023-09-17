@@ -11,25 +11,27 @@ class ApiController(object):
             'schedules': '/schedules'
         }
 
-    def error_check(self, endpoint, params = ''):
-        response = requests.get(self.url + self.endpoints[endpoint] + params).json()
+    def error_check(self, response):
         status = 'success' if 'response' in response else 'error'
         response = response['response'] if status == 'success' else response['error']
         return {'status': status, 'response': response}
 
     def get_levels(self):
-        return api.error_check('levels')
+        response = requests.get(self.url + self.endpoints['levels']).json()
+        return self.error_check(response)
 
     def get_groups(self, level_id: str | int):
         params = f'?level_id={level_id}'
-        return api.error_check('groups', params)
+        response = requests.get(self.url + self.endpoints['groups'] + params).json()
+        return self.error_check(response)
 
     def get_schedules(self, group: str | int, dateStart: str, dateEnd: str, subgroups: list | None = None):
         params = f'?group={group}&dateStart={dateStart}&dateEnd={dateEnd}'
         if subgroups:
             subgroups = urllib.parse.quote(json.dumps(subgroups))
             params += f'&subgroups={subgroups}'
-        return api.error_check('schedules', params)
+        response = requests.get(self.url + self.endpoints['schedules'] + params).json()
+        return self.error_check(response)
 
 if __name__ == '__main__':
     from dotenv import dotenv_values
@@ -44,7 +46,7 @@ if __name__ == '__main__':
 
     schedule = api.get_schedules(2424, '18.09.2023', '19.09.2023')['response']
     print(schedule)
-   
+    '''
     print(api.get_schedules(
         1482,
         '18.09.2023',
@@ -57,3 +59,4 @@ if __name__ == '__main__':
             }
         ])
     )
+    #'''
